@@ -1,12 +1,18 @@
 ---
-- name: Copy `/home/kerim/config/slurm.conf` so it is same across all nodes
-  hosts: all
+- name: Copy `/home/kerim/config/slurm.conf`to ~/shared folder
+  hosts: masternodes
   remote_user: kerim   # Using Remote user
   become: true         # Run commands with `sudo`
   tasks:
     - name: Do copy to shared dir
       command: cp /home/kerim/config/slurm.conf /home/kerim/shared/
-    - name: Do copy
+
+- name: Copy `/home/kerim/shared/slurm.conf` to all compute nodes
+  hosts: all
+  remote_user: kerim   # Using Remote user
+  become: true         # Run commands with `sudo`
+  tasks:
+    - name: Do copy dest dir
       command: cp /home/kerim/shared/slurm.conf /etc/slurm/
 
 - name: Regenerate `/etc/munge/munge.key` so it is same across all nodes
