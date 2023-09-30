@@ -130,7 +130,7 @@ grep -qxF 'export PATH='$JL_ROOT'/bin:$PATH' $HOME/.bashrc || echo 'export PATH=
 
 $JULIA -e 'using Pkg;rm(abspath(first(DEPOT_PATH), "conda", "deps.jl"), force=true);rm(abspath(first(DEPOT_PATH), "packages", "Conda"), force=true, recursive=true);Pkg.add("PyCall");Pkg.build("PyCall")'
 $JULIA -e 'using Pkg;Pkg.add("JUDI");Pkg.build("JUDI")' # JUDI will install devito and pyrevolve of desired versions
-$JULIA -e 'using Pkg;Pkg.add.(["Statistics","Random","LinearAlgebra","Interpolations","DelimitedFiles","Distributed","SlimOptim","NLopt","HDF5","SegyIO","Plots","PyPlot","ImageFiltering","SetIntersectionProjection","ClusterManagers","ArgParse"])'
+$JULIA -e 'using Pkg;Pkg.add.(["Statistics","Random","LinearAlgebra","Interpolations","DelimitedFiles","Distributed","SlimOptim","NLopt","HDF5","SegyIO","Plots","PyPlot","ImageFiltering","SetIntersectionProjection","ClusterManagers","ArgParse","ThreadPinning"])'
 
 # make shared folders (run service and add it to startup (requires nfs-utils package))
 sudo systemctl enable rpcbind
