@@ -75,10 +75,13 @@ ln -sf $GCC_ROOT/bin/gcc $GCC_ROOT/bin/gcc-10
 
 # run CMake with gcc-11 by default
 export CC=$GCC_ROOT/bin/gcc
+export CXX=$GCC_ROOT/bin/g++
 # add GCC11 and GCC12 GLIBCXX_... to be able to compile and link with those compilers
 export LD_LIBRARY_PATH=$GCC_ROOT/lib64:$LD_LIBRARY_PATH
 
 # modify ~/.bashrc
+grep -qxF 'export CC='$CC $HOME/.bashrc || echo 'export CC='$CC >> $HOME/.bashrc
+grep -qxF 'export CXX='$CXX $HOME/.bashrc || echo 'export CXX='$CXX >> $HOME/.bashrc
 grep -qxF 'export PATH='$GCC_ROOT'/bin:$PATH' $HOME/.bashrc || echo 'export PATH='$GCC_ROOT'/bin:$PATH' >> $HOME/.bashrc
 grep -qxF 'export LD_LIBRARY_PATH='$GCC_ROOT'/lib64:$LD_LIBRARY_PATH' $HOME/.bashrc || echo 'export LD_LIBRARY_PATH='$GCC_ROOT'/lib64:$LD_LIBRARY_PATH' >> $HOME/.bashrc
 

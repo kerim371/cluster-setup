@@ -5,6 +5,14 @@ SHARED_DIR=$HOME/shared
 JL_DEPOT=$HOME/.julia
 MASTER_NAME=master-fwi
 
+GCC_MAJ="10"
+GCC_MIN="2"
+GCC_PATCH="0"
+GCC_PREFIX=$APP_DIR/gcc/$GCC_MAJ.$GCC_MIN
+GCC_ROOT=$GCC_PREFIX
+CC=$GCC_ROOT/bin/gcc
+CXX=$GCC_ROOT/bin/g++
+
 PY_MAJ="3"
 PY_MIN="9"
 PY_PATCH="18"
@@ -43,6 +51,10 @@ export LD_LIBRARY_PATH=$PY_ROOT/lib:$LD_LIBRARY_PATH
 export PYTHON=$PY_ROOT/bin/python
 
 # modify ~/.bashrc
+grep -qxF 'export CC='$CC $HOME/.bashrc || echo 'export CC='$CC >> $HOME/.bashrc
+grep -qxF 'export CXX='$CXX $HOME/.bashrc || echo 'export CXX='$CXX >> $HOME/.bashrc
+grep -qxF 'export PATH='$GCC_ROOT'/bin:$PATH' $HOME/.bashrc || echo 'export PATH='$GCC_ROOT'/bin:$PATH' >> $HOME/.bashrc
+grep -qxF 'export LD_LIBRARY_PATH='$GCC_ROOT'/lib64:$LD_LIBRARY_PATH' $HOME/.bashrc || echo 'export LD_LIBRARY_PATH='$GCC_ROOT'/lib64:$LD_LIBRARY_PATH' >> $HOME/.bashrc
 grep -qxF 'export PATH='$PY_ROOT'/bin:$PATH' $HOME/.bashrc || echo 'export PATH='$PY_ROOT'/bin:$PATH' >> $HOME/.bashrc
 grep -qxF 'export LD_LIBRARY_PATH='$PY_ROOT'/lib:$LD_LIBRARY_PATH' $HOME/.bashrc || echo 'export LD_LIBRARY_PATH='$PY_ROOT'/lib:$LD_LIBRARY_PATH' >> $HOME/.bashrc
 grep -qxF 'export PYTHON='$PY_ROOT'/bin/python' $HOME/.bashrc || echo 'export PYTHON='$PY_ROOT'/bin/python' >> $HOME/.bashrc
