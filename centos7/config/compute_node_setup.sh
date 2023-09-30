@@ -3,6 +3,7 @@
 APP_DIR=$HOME/shared_app
 SHARED_DIR=$HOME/shared
 JL_DEPOT=$HOME/.julia
+LOCAL_DIR=$HOME/.local  # `python -m install -U --user` installs pacakges to LOCAL_DIR subdir (JUDI do that for its deps like `devito`)
 MASTER_NAME=master-fwi
 
 GCC_MAJ="10"
@@ -35,14 +36,17 @@ sudo systemctl start nfs-server
 mkdir -p $APP_DIR
 mkdir -p $SHARED_DIR
 mkdir -p $JL_DEPOT
+mkdir -p $LOCAL_DIR
 
 sudo mount -t nfs $MASTER_NAME:$APP_DIR $APP_DIR
 sudo mount -t nfs $MASTER_NAME:$SHARED_DIR $SHARED_DIR
 sudo mount -t nfs $MASTER_NAME:$JL_DEPOT $JL_DEPOT
+sudo mount -t nfs $MASTER_NAME:$LOCAL_DIR $LOCAL_DIR
 
-grep -qxF ''$MASTER_NAME':'$APP_DIR' '$APP_DIR' nfs rw,sync,hard,intr 0 0' /etc/fstab || echo ''$MASTER_NAME':'$APP_DIR' '$APP_DIR' nfs rw,sync,hard,intr 0 0' >> /etc/fstab
-grep -qxF ''$MASTER_NAME':'$SHARED_DIR' '$SHARED_DIR' nfs rw,sync,hard,intr 0 0' /etc/fstab || echo ''$MASTER_NAME':'$SHARED_DIR' '$SHARED_DIR' nfs rw,sync,hard,intr 0 0' >> /etc/fstab
-grep -qxF ''$MASTER_NAME':'$JL_DEPOT' '$JL_DEPOT' nfs rw,sync,hard,intr 0 0' /etc/fstab || echo ''$MASTER_NAME':'$JL_DEPOT' '$JL_DEPOT' nfs rw,sync,hard,intr 0 0' >> /etc/fstab
+grep -qxF $MASTER_NAME':'$APP_DIR' '$APP_DIR' nfs rw,sync,hard,intr 0 0' /etc/fstab || echo $MASTER_NAME':'$APP_DIR' '$APP_DIR' nfs rw,sync,hard,intr 0 0'  | sudo tee -a /etc/fstab
+grep -qxF $MASTER_NAME':'$SHARED_DIR' '$SHARED_DIR' nfs rw,sync,hard,intr 0 0' /etc/fstab || echo $MASTER_NAME':'$SHARED_DIR' '$SHARED_DIR' nfs rw,sync,hard,intr 0 0'  | sudo tee -a /etc/fstab
+grep -qxF $MASTER_NAME':'$JL_DEPOT' '$JL_DEPOT' nfs rw,sync,hard,intr 0 0' /etc/fstab || echo $MASTER_NAME':'$JL_DEPOT' '$JL_DEPOT' nfs rw,sync,hard,intr 0 0'  | sudo tee -a /etc/fstab
+grep -qxF $MASTER_NAME':'$LOCAL_DIR' '$LOCAL_DIR' nfs rw,sync,hard,intr 0 0' /etc/fstab || echo $MASTER_NAME':'$LOCAL_DIR' '$LOCAL_DIR' nfs rw,sync,hard,intr 0 0'  | sudo tee -a /etc/fstab
 
 # ======================================================
 # MODIFY ~/.bashrc

@@ -4,6 +4,7 @@
 APP_DIR=$HOME/shared_app
 SHARED_DIR=$HOME/shared
 JL_DEPOT=$HOME/.julia
+LOCAL_DIR=$HOME/.local  # `python -m install -U --user` installs pacakges to LOCAL_DIR subdir (JUDI do that for its deps like `devito`)
 
 # Build newer GCC as default GCC-4.8.5 is too old to support OmpenMP
 # It preferably to have GCC > 9
@@ -40,16 +41,19 @@ sudo systemctl start nfs-server
 mkdir -p $APP_DIR
 mkdir -p $SHARED_DIR
 mkdir -p $JL_DEPOT
+mkdir -p $LOCAL_DIR
 
 sudo chmod -R 777 $APP_DIR
 sudo chmod -R 777 $SHARED_DIR
 sudo chmod -R 777 $JL_DEPOT
+sudo chmod -R 777 $LOCAL_DIR
 
 # `sudo -i` seems doesn't work with `scl` installed and enabled
 # that is why here we have `sudo` at the end of the command
-grep -qxF ''$APP_DIR' *(rw,sync,no_root_squash,no_subtree_check)' /etc/exports || echo ''$APP_DIR' *(rw,sync,no_root_squash,no_subtree_check)' | sudo tee -a /etc/exports
-grep -qxF ''$SHARED_DIR' *(rw,sync,no_root_squash,no_subtree_check)' /etc/exports || echo ''$SHARED_DIR' *(rw,sync,no_root_squash,no_subtree_check)' | sudo tee -a /etc/exports
-grep -qxF ''$JL_DEPOT' *(rw,sync,no_root_squash,no_subtree_check)' /etc/exports || echo ''$JL_DEPOT' *(rw,sync,no_root_squash,no_subtree_check)' | sudo tee -a /etc/exports
+grep -qxF $APP_DIR' *(rw,sync,no_root_squash,no_subtree_check)' /etc/exports || echo $APP_DIR' *(rw,sync,no_root_squash,no_subtree_check)' | sudo tee -a /etc/exports
+grep -qxF $SHARED_DIR' *(rw,sync,no_root_squash,no_subtree_check)' /etc/exports || echo $SHARED_DIR' *(rw,sync,no_root_squash,no_subtree_check)' | sudo tee -a /etc/exports
+grep -qxF $JL_DEPOT' *(rw,sync,no_root_squash,no_subtree_check)' /etc/exports || echo $JL_DEPOT' *(rw,sync,no_root_squash,no_subtree_check)' | sudo tee -a /etc/exports
+grep -qxF $LOCAL_DIR' *(rw,sync,no_root_squash,no_subtree_check)' /etc/exports || echo $LOCAL_DIR' *(rw,sync,no_root_squash,no_subtree_check)' | sudo tee -a /etc/exports
 
 sudo exportfs -a
 sudo systemctl restart nfs
