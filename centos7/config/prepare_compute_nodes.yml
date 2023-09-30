@@ -1,0 +1,14 @@
+---
+- name: Prepare compute nodes
+  hosts: computenodes
+  remote_user: kerim
+  become: false        # DON'T SET ROOT RIGHTS OR SHARED DIRS WILL BE IN `/home/root/`
+  vars:
+    script_path: /home/kerim/config/compute_node_setup.sh
+  tasks:
+    - name: Change `compute_node_setup.sh` permissions
+      ansible.builtin.file:
+        path: "{{ script_path }}"
+        mode: +x
+    - name: Run 'common_setup.sh'
+      ansible.builtin.script: "{{ script_path }}"

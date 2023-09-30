@@ -1,0 +1,46 @@
+---
+- name: Share `~/shared` dir to all nodes
+  hosts: master
+  remote_user: kerim   # Using Remote user
+  become: true         # Run commands with `sudo`
+  ignore_errors: true  # Or it will fail if the dir is already mounted
+  tasks:
+  - name: Make rpcbind autostart
+    command: systemctl enable rpcbind
+  - name: Make nfs-server autostart
+    command: systemctl enable nfs-server
+  - name: Start rpcbind
+    command: systemctl start rpcbind
+  - name: Start nfs-server
+    command: systemctl start nfs-server
+  - name: Make `~/shared` dir
+    command: mkdir -p /home/kerim/shared
+  - name: Set rights for `~/shared` dir
+    command: chmod -R 777 /home/kerim/shared
+  - name: Share dir
+    command: grep -qxF '/home/kerim/shared *(rw,sync,no_root_squash,no_subtree_check)' /etc/exports || echo '/home/kerim/shared *(rw,sync,no_root_squash,no_subtree_check)' >> /etc/exports
+  - name: Export fs
+    command: exportfs -a
+  - name: Restart nfs
+    command: systemctl restart nfs
+
+- name: Mount `~/shared` dir to all nodes except master
+  hosts: all, !master
+  remote_user: kerim   # Using Remote user
+  become: true         # Run commands with `sudo`
+  ignore_errors: true  # Or it will fail if the dir is already mounted
+  tasks:
+  - name: Make rpcbind autostart
+    command: systemctl enable rpcbind
+  - name: Make nfs-server autostart
+    command: systemctl enable nfs-server
+  - name: Start rpcbind
+    command: systemctl start rpcbind
+  - name: Start nfs-server
+    command: systemctl start nfs-server
+  - name: Make mount dir
+    command: mkdir -p /home/kerim/shared
+  - name: Do mount `/home/kerim/shared`
+    command: mount -t nfs master-fwi:/home/kerim/shared /home/kerim/shared
+  - name: Make mount at startup
+    shell: grep -qxF 'master-fwi:/home/kerim/shared/ /home/kerim/shared/ nfs rw,sync,hard,intr 0 0' /etc/fstab || echo 'master-fwi:/home/kerim/shared/ /home/kerim/shared/ nfs rw,sync,hard,intr 0 0' >> /etc/fstab

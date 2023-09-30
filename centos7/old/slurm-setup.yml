@@ -1,0 +1,232 @@
+# - name: Remove munge and slurm groups and users
+#   hosts: all
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   ignore_errors: true
+#   tasks:
+#     - name: Set MUNGEUSER var
+#       set_fact:
+#         MUNGEUSER: 991
+#     - name: Add munge group
+#       command: 'groupadd -g {{ MUNGEUSER }} munge'
+#     - name: Add munge user
+#       command: "useradd  -m -c \"MUNGE Uid 'N' Gid Emporium\" -d /var/lib/munge -u {{ MUNGEUSER }} -g munge -s /sbin/nologin munge"
+#     - name: Set MUNGEUSER var
+#       set_fact:
+#         SLURMUSER: 992
+#     - name: Add slurm group
+#       command: 'groupadd -g {{ SLURMUSER }} slurm'
+#     - name: Add slurm user
+#       command: "useradd  -m -c \"SLURM workload manager\" -d /var/lib/slurm -u {{ SLURMUSER }} -g slurm  -s /bin/bash slurm"
+
+# - name: Install deps
+#   hosts: all
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#     - name: Install epel-release
+#       ansible.builtin.yum:
+#         name:
+#           - epel-release
+#         state: present
+#     - name: Install munge munge-libs munge-devel
+#       ansible.builtin.yum:
+#         name:
+#           - munge
+#           - munge-libs
+#           - munge-devel
+#         state: present
+
+# HANGS ON WHEN DAEMON IS WORKING
+# - name: Regenerate `/etc/munge/munge.key` so it is single file across all nodes
+#   hosts: localhost
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#     - name: Do regenerate
+#       command: create-munge-key -f
+
+# - name: Mount `/etc/munge` dir to all nodes except master (MUST GO AFTER `create-munge-key` IS RAN)
+#   hosts: all, !localhost
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   ignore_errors: true
+#   tasks:
+#   - name: Create dir for mounting `/etc/munge`
+#     command: mkdir -p /etc/munge
+#   - name: Do mount `/etc/munge`
+#     command: mount -t nfs master-fwi:/etc/munge /etc/munge
+
+# - name: Change owner and rights for munge dirs
+#   hosts: all
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#   - name: chown
+#     command: "chown -R munge: /etc/munge/ /var/log/munge/"
+#   - name: chmod
+#     command: "chmod 0700 /etc/munge/ /var/log/munge/"
+
+
+# # ======================= SETUP SLURM =======================
+# - name: Install deps
+#   hosts: all
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#     - name: Install epel-release
+#       ansible.builtin.yum:
+#         name:
+#           - openssl
+#           - openssl-devel
+#           - pam-devel
+#           - numactl
+#           - numactl-devel
+#           - hwloc
+#           - hwloc-devel
+#           - lua
+#           - lua-devel
+#           - readline-devel
+#           - rrdtool-devel
+#           - ncurses-devel
+#           - man2html
+#           - libibmad
+#           - libibumad
+#           - rpm-build
+#           - python3
+#           - perl
+#           - pam-devel
+#           - perl-ExtUtils*
+#           - dnf
+#           - freeipmi-devel
+#           - http-parser-devel
+#           - json-c-devel
+#           - libjwt-devel
+#           - libyaml-devel
+#           - gtk2-devel
+#           - perl-Switch
+#           - xorg-x11-xauth
+#           - MySQL-python
+#           - mariadb-server
+#           - mariadb-devel
+#         state: present
+#     - name: Install jq
+#       ansible.builtin.dnf:
+#         name: 
+#           - jq
+#         state: present
+
+
+# - name: build SLURM
+#   hosts: localhost
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#     - name: Wget SLURM
+#       command: wget -P /home/kerim/shared https://download.schedmd.com/slurm/slurm-23.02.5.tar.bz2
+#     - name: Build SLURM
+#       command: rpmbuild -ta /home/kerim/shared/slurm-23.02.5.tar.bz2 --with mysql
+#     - name: Create dir for slurm-rpms
+#       command: mkdir -p /home/kerim/shared/slurm-rpms
+#     - name: Copy to slurm-rpms
+#       command: cp /home/kerim/rpmbuild/RPMS/x86_64/* /home/kerim/shared/slurm-rpms
+
+
+
+# - name: Install slurm-rpms on every node
+#   hosts: all
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#     - name: Do install
+#       command: "yum --nogpgcheck localinstall /home/kerim/shared/slurm-rpms/* -y"
+
+
+# - name: Copy slurm.conf to shared folder
+#   hosts: localhost
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#     - name: Do copy
+#       command: cp /home/kerim/setup/slurm.conf /home/kerim/shared/
+
+# - name: Copy slurm.conf to all nodes
+#   hosts: all
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#     - name: Create dest folder
+#       command: mkdir -p /etc/slurm/
+#     - name: Do copy
+#       command: cp /home/kerim/shared/slurm.conf /etc/slurm/
+
+# - name: On the master node, make sure that the master has all the right configurations and files
+#   hosts: localhost
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#     - name: Make dir
+#       command: mkdir -p /var/spool/slurm
+#     - name: Make dir
+#       command: mkdir -p /var/log/slurm
+#     - name: chown
+#       command: "chown slurm: /var/spool/slurm/"
+#     - name: chmod
+#       command: "chmod 755 /var/spool/slurm/"
+#     - name: touch
+#       command: "touch /var/log/slurmctld.log"
+#     - name: chown
+#       command: "chown slurm: /var/log/slurmctld.log"
+#     - name: touch
+#       command: "touch /var/log/slurm_jobacct.log /var/log/slurm/slurm_jobcomp.log"
+#     - name: chown
+#       command: "chown slurm: /var/log/slurm_jobacct.log /var/log/slurm/slurm_jobcomp.log"
+
+# - name: On the computing nodes, make sure that all the computing nodes have the right configurations and files
+#   hosts: all,!localhost
+#   remote_user: kerim   # Using Remote user
+#   become: true         # Run commands with `sudo`
+#   tasks:
+#     - name: Make dir
+#       command: mkdir -p /var/spool/slurm
+#     - name: Make dir
+#       command: mkdir -p /var/log/slurm
+#     - name: chown dir
+#       command: "chown slurm: /var/spool/slurm"
+#     - name: chmod
+#       command: "chmod 755 /var/spool/slurm"
+#     - name: touch
+#       command: "touch /var/log/slurm/slurmd.log"
+#     - name: chown
+#       command: "chown slurm: /var/log/slurm/slurmd.log"
+
+
+
+- name: Sync clocks on the cluster on every node
+  hosts: all
+  remote_user: kerim   # Using Remote user
+  become: true         # Run commands with `sudo`
+  ignore_errors: true
+  tasks:
+    - name: Install ntp 
+      ansible.builtin.yum:
+        name:
+          - ntp 
+        state: present
+    - name: chkconfig
+      command: chkconfig ntpd on
+    - name: ntpdate
+      command: ntpdate pool.ntp.org
+    - name: systemctl
+      command: systemctl start ntpd
+
+- name: On the computing nodes, make sure that all the computing nodes have the right configurations and files
+  hosts: all,!localhost
+  remote_user: kerim   # Using Remote user
+  become: true         # Run commands with `sudo`
+  tasks:
+    - name: systemctl
+      command: systemctl enable slurmd.service
+    - name: systemctl
+      command: systemctl start slurmd.service
+    - name: systemctl
+      command: systemctl status slurmd.service

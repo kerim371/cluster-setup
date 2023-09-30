@@ -1,0 +1,54 @@
+---
+- name: Copy `/home/kerim/config/slurm.conf` so it is same across all nodes
+  hosts: all
+  remote_user: kerim   # Using Remote user
+  become: true         # Run commands with `sudo`
+  tasks:
+    - name: Do copy to shared dir
+      command: cp /home/kerim/config/slurm.conf /home/kerim/shared/
+    - name: Do copy
+      command: cp /home/kerim/shared/slurm.conf /etc/slurm/
+
+- name: Regenerate `/etc/munge/munge.key` so it is same across all nodes
+  hosts: masternodes
+  become: true         # Run commands with `sudo`
+  tasks:
+    - name: Do regenerate
+      command: create-munge-key -f
+    - name: Copy munge.key to shared dir to redistribute it among all nodes afterwards
+      command: cp /etc/munge/munge.key /home/kerim/shared/
+
+- name: Copy munge.key across all nodes
+  hosts: all
+  become: true         # Run commands with `sudo`
+  tasks:
+    - name: Do copy
+      command: cp /home/kerim/shared/munge.key /etc/munge/
+
+- name: Start managers
+  hosts: masternodes
+  remote_user: kerim   # Using Remote user
+  become: true         # Run commands with `sudo`
+  tasks:
+    - name: Start managers
+      shell: |
+        systemctl enable munge
+        systemctl restart munge
+        systemctl enable slurmctld
+        systemctl restart slurmctld.service
+        systemctl enable slurmdbd
+        systemctl restart slurmdbd
+
+- name: Start compute nodes
+  hosts: computenodes
+  remote_user: kerim   # Using Remote user
+  become: true         # Run commands with `sudo`
+  tasks:
+    - name: Start compute nodes
+      shell: |
+        systemctl enable munge
+        systemctl restart munge
+        systemctl enable slurmd.service
+        systemctl restart slurmd.service
+        systemctl enable slurmdbd
+        systemctl restart slurmdbd

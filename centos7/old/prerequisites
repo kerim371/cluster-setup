@@ -1,0 +1,21 @@
+# From the documentation: https://cloud.yandex.ru/docs/tutorials/testing/hpc-on-preemptible
+sudo -i
+yum check-update
+yum install net-tools htop openmpi-devel nfs-utils nano wget -y
+
+NOTE: to run MPI one have to preliminary use the command: `module load mpi`
+
+# After that make disk snapshot and run computing nodes
+
+# ansible installation is done in two steps
+sudo yum install epel-release
+sudo yum install ansible
+
+# Make shared folder, add:
+# /home/kerim/shared *(rw,sync,no_root_squash,no_subtree_check)
+# to the file `/etc/exports`
+mkdir ~/shared
+sudo nano /etc/exports
+sudo exportfs -a
+sudo systemctl restart nfs
+sudo mount -t nfs master-fwi:/home/kerim/shared /home/kerim/shared

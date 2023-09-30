@@ -1,0 +1,8 @@
+
+# avoid using `-`: Ansible prohibits that
+[masternodes]
+master ansible_host=10.128.0.31
+
+[computenodes]
+node1 ansible_host=10.128.0.6
+node2 ansible_host=10.128.0.35
